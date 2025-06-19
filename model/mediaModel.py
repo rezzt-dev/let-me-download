@@ -48,19 +48,19 @@ def downloadVideoFromURL (inputOutputFolder, inputVideoURL):
 
 
 #——————————————————————————————————————————————————————————————————————————————————————————————————————————————————
- # function | downloadAudioFromVideo | descargar el audio de un video a traves de la URL ->
+# function | downloadAudioFromVideo | descargar el audio de un video a traves de la URL ->
+# function | downloadAudioFromVideo | descargar el audio de un video a traves de la URL ->
 def downloadAudioFromVideo(inputOutputFolder, inputVideoURL):
   downloadPath = inputOutputFolder
-
   try:
     downloadVideoPath = str(downloadVideoFromURL(inputOutputFolder, inputVideoURL))
     if not os.path.exists(downloadVideoPath):
       print(f"[bold red] [!] ERROR CRÍTICO: Archivo no encontrado: {downloadVideoPath} [/bold red]")
       return None
-
+    
     base_audio = os.path.splitext(os.path.basename(downloadVideoPath))[0]
-    downloadAudioPath, _ = getUniqueFilename(downloadPath, base_audio, ".mp3")
-
+    downloadAudioPath, *_ = getUniqueFilename(downloadPath, base_audio, ".mp3")
+    
     auxVideo = VideoFileClip(downloadVideoPath)
     auxVideo.audio.write_audiofile(
       downloadAudioPath,
@@ -72,11 +72,13 @@ def downloadAudioFromVideo(inputOutputFolder, inputVideoURL):
     auxVideo.close()
     os.remove(downloadVideoPath)
     return downloadAudioPath
-
+    
   except subprocess.CalledProcessError as ex:
     print(f"[bold red] [!] ERROR CRÍTICO: {str(ex)} [/bold red]")
+    return None
   except Exception as ex:
     print(f"[bold red] [!] ERROR CRÍTICO: {str(ex)} [/bold red]")
+    return None
   finally:
     if 'auxVideo' in locals() and isinstance(auxVideo, VideoFileClip):
       auxVideo.close()

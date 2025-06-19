@@ -6,6 +6,7 @@ import tty
 import subprocess
 import threading
 import tkinter as tk
+import spotipy
 
 
 #——————————————————————————————————————————————————————————————————————————————————————————————————————————————————
@@ -19,3 +20,6 @@ from datetime import datetime
 
 from tkinter import filedialog
 from tkinter import messagebox
+
+from spotipy.oauth2 import SpotifyClientCredentials
+from pytube import Search, YouTube

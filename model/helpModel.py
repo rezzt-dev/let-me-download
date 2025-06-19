@@ -75,7 +75,7 @@ def loadingAnimation(stopEvent):
   idx = 0
   console = Console()
   while not stopEvent.is_set():
-    console.print(f"[bold blue]\r  [{icons[idx]}] Descargando los recursos del video... [/bold blue]", end="\r")
+    console.print(f"[bold blue]\r  [{icons[idx]}] Descargando los recursos del fichero... [/bold blue]", end="\r")
     idx = (idx + 1) % len(icons)
     time.sleep(0.2)
   console.print(" " * 70, end="\n\n")

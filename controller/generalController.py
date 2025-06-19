@@ -6,6 +6,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from libraries.imports import *
 from model.helpModel import *
 from model.mediaModel import *
+from model.spotModel import *
 
 
 #——————————————————————————————————————————————————————————————————————————————————————————————————————————————————
@@ -23,6 +24,30 @@ def executeController (inputFileURL, boolVideo: bool, boolAudio: bool):
   
   counter = 0
   for videoURL in videoURLs:
+    if "open.spotify.com" in videoURL:
+      if "playlist" in videoURL:
+        playlistFolderPath = createPlaylistFolder(subcontainerFolder)
+        if not playlistFolderPath.exists():
+          playlistFolderPath.mkdir(exist_ok=True)
+
+        print("[bold yellow] [>] Cargando canciones de la Playlist[/bold yellow]")
+        playlistTracks = getPlaylistTracks(videoURL)
+
+        for trackQuery in playlistTracks:
+          print(f"[bold white]   => Descargando: {trackQuery}[/bold white]")
+          searchDownloadSong(playlistFolderPath, trackQuery)
+        
+        print("[bold green]  [+] DONE! Descarga completa de la Playlist.[/bold green]")
+      
+      else:
+        trackQuery = getTrackInfo(videoURL)
+        print(f"[bold white] [>] Descargando: {trackQuery}[/bold white]")
+        searchDownloadSong(subcontainerFolder, trackQuery)
+        print("[bold green] [+] DONE! Descarga completada.[/bold green]")
+      
+      continue
+
+
     if boolVideo:
       downloadVideoFromURL(subcontainerFolder, videoURL)
     if boolAudio:
