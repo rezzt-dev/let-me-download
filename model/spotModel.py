@@ -5,7 +5,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from libraries.imports import *
 from config.configSettings import SPICETIFY_CLIENT_ID, SPICETIFY_CLIENT_SECRET
-from model.mediaModel import downloadAudioFromVideo
+from model.mediaModel import downloadAudioDirectly
 
 
 #——————————————————————————————————————————————————————————————————————————————————————————————————————————————————
@@ -44,30 +44,42 @@ def getTrackInfo (inputSpotifyURL):
 #——————————————————————————————————————————————————————————————————————————————————————————————————————————————————
  # function | searchDownloadSong | busca y descarga una cancion de Spotify ->
 def searchDownloadSong (inputOutputFolder, inputQuery):
-  seacher = Search(inputQuery)
-  if not seacher.results:
-    print("[bold red] [!] ERROR CRITICO: No se encontraron resultados.[bold red]")
-    return
-  
-  firstResult = seacher.results[0]
-  try:
-    videoId = firstResult.video_id
-  except AttributeError:
-    videoId = firstResult['video_id']
-  youtubeURL = f"https://youtube.com/watch?v={videoId}"
-  downloadAudioFromVideo(inputOutputFolder, youtubeURL)
+  with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+    seacher = Search(inputQuery)
+    
+    if not seacher.results:
+      print("[bold red] [!] ERROR CRITICO: No se encontraron resultados.[bold red]")
+      return
+    
+    firstResult = seacher.results[0]
+    try:
+      videoId = firstResult.video_id
+    except AttributeError:
+      videoId = firstResult['video_id']
+    youtubeURL = f"https://youtube.com/watch?v={videoId}"
+  downloadAudioDirectly(inputOutputFolder, youtubeURL)
 
 
 #——————————————————————————————————————————————————————————————————————————————————————————————————————————————————
  # function | getPlaylistTracks | obtiene las canciones de una playlist de spotify ->
-def getPlaylistTracks (inputPlaylistURL):
+def getPlaylistTracks(inputPlaylistURL):
   playlistId = inputPlaylistURL.split('/')[-1].split('?')[0]
   results = sp.playlist_tracks(playlistId)
   playTracks = []
-
+  
   for item in results["items"]:
     track = item['track']
-    name = track['name']
-    artist = track['artists'][0]['name']
-    playTracks.append(f"{name} {artist}")
+    
+    if track is not None:
+      name = track['name']
+
+      if track['artists'] and len(track['artists']) > 0:
+        artist = track['artists'][0]['name']
+        playTracks.append(f"{name} {artist}")
+      else:
+        playTracks.append(name)
+
+    else:
+      print("Encontrada una canción no disponible (track = None)")
+  
   return playTracks

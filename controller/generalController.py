@@ -37,12 +37,14 @@ def executeController (inputFileURL, boolVideo: bool, boolAudio: bool):
           print(f"[bold white]   => Descargando: {trackQuery}[/bold white]")
           searchDownloadSong(playlistFolderPath, trackQuery)
         
+        downloadedMediaDone.append(videoURL)
         print("[bold green]  [+] DONE! Descarga completa de la Playlist.[/bold green]")
       
       else:
         trackQuery = getTrackInfo(videoURL)
         print(f"[bold white] [>] Descargando: {trackQuery}[/bold white]")
         searchDownloadSong(subcontainerFolder, trackQuery)
+        downloadedMediaDone.append(videoURL)
         print("[bold green] [+] DONE! Descarga completada.[/bold green]")
       
       continue
@@ -51,7 +53,7 @@ def executeController (inputFileURL, boolVideo: bool, boolAudio: bool):
     if boolVideo:
       downloadVideoFromURL(subcontainerFolder, videoURL)
     if boolAudio:
-      downloadAudioFromVideo(subcontainerFolder, videoURL)
+      downloadAudioDirectly(subcontainerFolder, videoURL)
 
     mediaName = extractTitleFromMedia(videoURL)
     if mediaName != None:
