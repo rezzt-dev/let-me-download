@@ -1,8 +1,6 @@
  # import libraries | librerias completas ->
 import typer
 import time
-import termios
-import tty
 import io
 import subprocess
 import threading
