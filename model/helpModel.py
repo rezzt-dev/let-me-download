@@ -24,22 +24,14 @@ def getDownloadFolderPath ():
 #——————————————————————————————————————————————————————————————————————————————————————————————————————————————————
  # function | waitKey | espera a que el usuario pulse cualquier tecla ->
 def waitKey():
+  fd = sys.stdin.fileno()
+  old_settings = termios.tcgetattr(fd)
   try:
-    import msvcrt
-    return msvcrt.getch().decode('utf-8')
-
-  except ImportError:
-    import termios
-    import tty
-
-    fd = sys.stdin.fileno()
-    old_settings = termios.tcgetattr(fd)
-    try:
-      tty.setraw(fd)
-      ch = sys.stdin.read(1)
-    finally:
-      termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
-    return ch
+    tty.setraw(fd)
+    ch = sys.stdin.read(1)
+  finally:
+    termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
+  return ch
 
 
 #——————————————————————————————————————————————————————————————————————————————————————————————————————————————————

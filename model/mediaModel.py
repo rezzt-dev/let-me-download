@@ -14,54 +14,50 @@ def downloadVideoFromURL(inputOutputFolder, inputVideoURL):
   try:
     videoCommand = [
       "yt-dlp",
-      "-f", "best[height<=720]/best",
+      "--restrict-filenames",
+      "--no-playlist",
+      "-f", "bv*[ext=mp4][height<=720]+ba[ext=m4a]/b[ext=mp4]",
       "-o", os.path.join(str(downloadPath), "%(title)s.%(ext)s"),
       inputVideoURL,
     ]
-    result = subprocess.run(
-      videoCommand,
-      shell=False,
-      check=True,
-      capture_output=True,
-      text=True
-    )
-    
+    subprocess.run(videoCommand, check=True, capture_output=True, text=True)
+
     actualFilesCommand = [
       "yt-dlp",
+      "--restrict-filenames",
+      "--no-playlist",
       "--print", "after_move:filepath",
-      "-f", "best[height<=720]/best",
+      "-f", "bv*[ext=mp4][height<=720]+ba[ext=m4a]/b[ext=mp4]",
       "-o", os.path.join(str(downloadPath), "%(title)s.%(ext)s"),
       "--simulate",
       inputVideoURL
     ]
-    
     try:
       actualPath = subprocess.check_output(actualFilesCommand, text=True).strip()
       if os.path.exists(actualPath):
         return actualPath
     except:
       pass
-    
+
     import glob
-    pattern = os.path.join(str(downloadPath), "*")
-    files = glob.glob(pattern)
+    files = glob.glob(os.path.join(downloadPath, "*"))
     if files:
-      newest_file = max(files, key=os.path.getctime)
-      return newest_file
-    
+      return max(files, key=os.path.getctime)
+
     videoTitleCommand = [
       "yt-dlp",
+      "--restrict-filenames",
+      "--no-playlist",
       "--print", "filename",
       "-o", os.path.join(str(downloadPath), "%(title)s.%(ext)s"),
       inputVideoURL
     ]
     outputFilename = subprocess.check_output(videoTitleCommand, text=True).strip()
-    outputPath = outputFilename
-    
-    if not os.path.exists(outputPath):
-      print(f"[bold red] [!] ERROR CRITICO: Archivo no encontrado: {outputPath} [/bold red]")
+    if not os.path.exists(outputFilename):
+      print(f"[bold red] [!] ERROR CRITICO: Archivo no encontrado: {outputFilename} [/bold red]")
       return None
-    return outputPath
+    return outputFilename
+
   except subprocess.CalledProcessError as ex:
     print(f"[bold red] [!] ERROR CRITICO: {str(ex)} [/bold red]")
     if ex.stderr:
@@ -139,6 +135,8 @@ def downloadAudioFromVideo(inputOutputFolder, inputVideoURL):
 def extractTitleFromMedia(inputVideoURL, downloadPath="."):
   videoTitleCommand = [
     "yt-dlp",
+    "--restrict-filenames",
+    "--no-playlist",
     "--print", "filename",
     "-o", os.path.join(str(downloadPath), "%(title)s.%(ext)s"),
     inputVideoURL
@@ -210,41 +208,41 @@ def extractAudioWithFFmpeg(videoPath, outputFolder):
  # function | downloadAudioDirectly | descarga el audio directamente sin pasar por el video y la conversion ->
 def downloadAudioDirectly(inputOutputFolder, inputVideoURL):
   downloadPath = inputOutputFolder
-  
+
   try:
     titleCommand = [
       "yt-dlp",
+      "--restrict-filenames",
+      "--no-playlist",
       "--print", "title",
       inputVideoURL
     ]
-    
+
     title = subprocess.check_output(titleCommand, text=True).strip()
     base_audio = title.replace("/", "_").replace("\\", "_")
     audioPath, *_ = getUniqueFilename(downloadPath, base_audio, ".mp3")
-    
+
     audioCommand = [
       "yt-dlp",
+      "--restrict-filenames",
+      "--no-playlist",
       "-x",
       "--audio-format", "mp3",
       "--audio-quality", "192K",
+      "-f", "bestaudio[ext=m4a]/bestaudio",
       "-o", audioPath.replace(".mp3", ".%(ext)s"),
       inputVideoURL
     ]
-    
-    result = subprocess.run(
-      audioCommand,
-      check=True,
-      capture_output=True,
-      text=True
-    )
-    
+
+    subprocess.run(audioCommand, check=True, capture_output=True, text=True)
+
     if os.path.exists(audioPath):
       print(f"[green] Audio descargado directamente: {audioPath} [/green]")
       return audioPath
     else:
       print(f"[bold red] [!] ERROR: No se pudo descargar el audio [/bold red]")
       return None
-      
+
   except subprocess.CalledProcessError as ex:
     print(f"[bold red] [!] ERROR yt-dlp: {str(ex)} [/bold red]")
     return None
